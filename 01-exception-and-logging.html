@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Exceptions and Logging in AngularJS</title>
+    <script src="angular.js"></script>
+    <script type="text/javascript">
+        'use strict';
+
+        (function (app) {
+
+            function Controller ($log) {
+                $log.log('Controller created.');
+                this.$log = $log;
+            }
+
+            Controller.prototype.warn = function () {
+                this.$log.warn('Warning generated.');
+            };
+
+            Controller.prototype.error = function () {
+                this.$log.error('Error generated.');
+                throw new Error('My custom error.');
+            };
+
+            Controller.prototype.debugger = function () {
+                debugger;
+                console.log('Here we are.');
+            };
+
+            Controller.$inject = ['$log'];
+
+            app.controller('myCtrl', Controller);
+
+            app.factory('$exceptionHandler', ['$injector', function ($injector) {
+
+                var rs = null;
+
+                return function (exception, cause) {
+                    if (rs === null) {
+                        rs = $injector.get('$rootScope');
+                    }
+                    exception.message = rs.errorList.length + ': ' + exception.message + ' (caused by "' + cause + '")';
+                    rs.errorList.push(exception.message);
+                    throw exception;
+                };
+            }]);
+
+
+            app.run(['$rootScope', function ($rootScope) {
+                $rootScope.errorList = [];
+            }]);
+
+        })(angular.module('angularApp', []));
+    </script>
+</head>
+<body data-ng-app="angularApp">
+<h1>Angular Debugging and Performance</h1>
+<h2>Exceptions and Logging</h2>
+<p>Example of using the exception handler and built-in logging.</p>
+<div data-ng-controller="myCtrl as ctrl">
+    <div><button data-ng-click="ctrl.warn()">Warn</button></div>
+    <div><button data-ng-click="ctrl.error()">Error</button></div>
+    <div><button data-ng-click="ctrl.debugger()">Debugger</button></div>
+</div>
+<div>
+    <b data-ng-if="errorList.length > 0">Error List</b>
+    <ul>
+        <li data-ng-repeat="error in errorList">{{error}}</li>
+    </ul>
+</div>
+</body>
+</html>

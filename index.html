@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Angular Debugging and Performance</title>
+    <script src="angular.js"></script>
+    <script type="text/javascript">
+        'use strict';
+
+        (function (app) {
+
+            app.constant('toc', [{
+                name: 'Exceptions and Logging Example',
+                url: '01-exception-and-logging.html'
+            }, {
+                name: 'Chrome Dev Tools Example',
+                url: '02-chrome-dev-tools.html'
+            }]);
+
+            function Controller (toc) {
+                this.toc = toc;
+            }
+
+            Controller.$inject = ['toc'];
+
+            app.controller('myCtrl', Controller);
+
+        })(angular.module('angularApp', []));
+    </script>
+</head>
+<body data-ng-app="angularApp">
+    <h1>Angular Debugging and Performance</h1>
+    <p>Table of Contents of examples.</p>
+    <ul data-ng-controller="myCtrl as ctrl">
+        <li data-ng-repeat="item in ctrl.toc">
+            <a data-ng-href="{{item.url}}">{{item.name}}</a>
+        </li>
+    </ul>
+</body>
+</html>

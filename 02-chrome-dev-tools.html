@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>AngularJS Chrome Dev Tools Example</title>
+    <script src="angular.js"></script>
+    <script type="text/javascript">
+        'use strict';
+
+        (function (app) {
+
+            function Controller ($scope, $compile) {
+                this.compile = function (e) {
+
+                    var newScope = $scope.$new(), elem;
+                    newScope.myCount = 0;
+
+                    // take up a significant portion of memory to make the leak easy to see
+                    newScope.list = Array.apply(null, new Array(100000)).map(Number.prototype.valueOf, 0xfe);
+
+                    // this watch will guarantee a reference exists to the new scope so it is not picked up by
+                    // garbage collection. The result of calling $watch is a function that will remove
+                    // the watch. Note the watch is set on the parent $scope which is still around even
+                    // after we try to destroy the new scope, thus keeping a "dangling reference"
+                    newScope.watch = $scope.$watch('count', function () {
+                        newScope.myCount += 1;
+                    });
+
+                    elem = $compile(e)(newScope);
+
+                    // when the element is removed, Angular fires $destroy for us
+                    elem.on('$destroy', function () {
+
+                       // 'destroyAware' means 'safe code' that understands how to clean up after itself
+                       if ($scope.destroyAware) {
+                           newScope.watch(); // remove the watch                          }
+                       }
+
+                        // this doesn't have the intended effect if the watch is not disengaged
+                        newScope.$destroy(); // eligible for garbage collection
+                    });
+                };
+            }
+
+            Controller.prototype.add = function () {
+
+                // simulate a third-party control adding a template and binding
+                // manually to $scope
+                var ul, li, text1, text2, btn, compiled;
+                ul = document.getElementById('manualList');
+                li = document.createElement('li');
+                text1 = document.createTextNode('{{myCount}}');
+                li.appendChild(text1);
+                text2 = document.createTextNode(' X ');
+                btn = document.createElement('button');
+                btn.appendChild(text2);
+                btn.onclick = function () {
+                    angular.element(li).remove();
+                };
+                li.appendChild(btn);
+                ul.appendChild(li);
+                this.compile(li);
+            };
+
+            Controller.$inject = ['$scope', '$compile'];
+
+            app.controller('myCtrl', Controller);
+
+            app.run(['$rootScope', '$timeout', function ($rootScope, $timeout) {
+
+                var incrementCount = function () {
+                    $rootScope.count += 1;
+                    $timeout(incrementCount, 1000);
+                };
+
+                $rootScope.count = 0;
+                $rootScope.destroyAware = false;
+
+                $timeout(incrementCount, 1000);
+            }]);
+
+        })(angular.module('angularApp', []));
+    </script>
+</head>
+<body data-ng-app="angularApp">
+<h1>Angular Debugging and Performance</h1>
+<h2>Chrome Dev Tools</h2>
+<p>Example of memory leak troubleshooting.</p>
+<p>Count: {{count}}</p>
+<p><input type="checkbox" data-ng-model="destroyAware"/> $destroy aware?</p>
+<div data-ng-controller="myCtrl as ctrl">
+    <div><button data-ng-click="ctrl.add()">Add</button></div>
+    <ul id="manualList">
+    </ul>
+</div>
+<div>
+    <b data-ng-if="errorList.length > 0">Error List</b>
+    <ul>
+        <li data-ng-repeat="error in errorList">{{error}}</li>
+    </ul>
+</div>
+</body>
+</html>
