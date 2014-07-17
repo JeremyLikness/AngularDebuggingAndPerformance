@@ -85,18 +85,16 @@
 <body data-ng-app="angularApp">
 <h1>Angular Debugging and Performance</h1>
 <h2>Chrome Dev Tools</h2>
-<p>Example of memory leak troubleshooting.</p>
+<p>Example of memory leak troubleshooting. Without the checkbox set, open Chrome Developer Tools and take a heap snapshot. Then,
+add several items to the list. Wait a few seconds, then remove them all. Go into "Timeline" in Chrome Developer tools, click the
+trash can to garbage collect, and take another heap snapshot. Use the comparison view to see the memory leak.</p>
+<p>Next, repeat this with the check box on (you should fully refresh the page and trigger garbage collection). Notice the
+difference in memory consumption after the divs are removed.</p>
 <p>Count: {{count}}</p>
 <p><input type="checkbox" data-ng-model="destroyAware"/> $destroy aware?</p>
 <div data-ng-controller="myCtrl as ctrl">
     <div><button data-ng-click="ctrl.add()">Add</button></div>
     <ul id="manualList">
-    </ul>
-</div>
-<div>
-    <b data-ng-if="errorList.length > 0">Error List</b>
-    <ul>
-        <li data-ng-repeat="error in errorList">{{error}}</li>
     </ul>
 </div>
 </body>
