@@ -65,8 +65,8 @@
 </head>
 <body data-ng-app="angularApp">
 <h1>Angular Debugging and Performance</h1>
-<h2>Rendering vs. Binding</h2>
-<p>Example of rendering static data vs. using data-binding.</p>
+<h2>Long List</h2>
+<p>Example of paging to manage extremely long lists. This example list has 1,000,000 entries.</p>
 <div data-ng-controller="myCtrl as ctrl">
     <ul><li data-ng-repeat="number in ctrl.displayList">{{number}}</li></ul>
     <button data-ng-click="ctrl.currentPage = 1">&lt;&lt;</button>
