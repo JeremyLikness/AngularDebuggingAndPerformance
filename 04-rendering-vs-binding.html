@@ -9,6 +9,9 @@
 
         (function (app) {
 
+            var db = 'Current is Rendered; Switch to Data-Binding',
+                r = 'Current is Data-binding; Switch to Rendered';
+
             function countWatches () {
                 var watchers = [],
                 f = function (element) {
@@ -52,10 +55,10 @@
                         _this.watches = countWatches()
                     }, 0);
                 },
-                text: 'Data-Binding',
+                text: db,
                 dataBound: false,
                 toggle: function () {
-                    this.text = this.dataBound ? 'Data-Binding' : 'Rendered';
+                    this.text = this.dataBound ? db : r;
                     this.dataBound = !this.dataBound;
                     this.countWatches();
                 }

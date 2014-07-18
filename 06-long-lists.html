@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>AngularJS Long List Example</title>
+    <script src="angular.js"></script>
+    <script type="text/javascript">
+        'use strict';
+
+        (function (app) {
+
+            function Controller () {
+                var idx = 0;
+                this.list = [];
+                this.displayList = [];
+                while (idx < 1000000) {
+                    this.list.push(Math.random());
+                    idx += 1;
+                }
+                this.refreshPages();
+            }
+
+            Controller.$inject = ['$scope'];
+
+            Object.defineProperty(Controller.prototype, "currentPage", {
+                enumerable: true,
+                configurable: true,
+                get: function () { return this._currentPage; },
+                set: function (val) {
+                    this._currentPage = val;
+                    this.refreshPages();
+                }
+            });
+
+            angular.extend(Controller.prototype, {
+                pageSize: 20,
+                _currentPage: 1,
+                nextPage: 2,
+                previousPage: 0,
+                currentIndex: 0,
+                totalPages: 0,
+                refreshPages: function () {
+                    var curIdx = this.currentIndex;
+                    this.totalPages = Math.ceil(this.list.length / this.pageSize);
+                    this.currentIndex = this.pageSize * (this._currentPage - 1);
+                    this.previousPage = this._currentPage - 1;
+                    this.nextPage = this._currentPage + 1;
+                    if (curIdx !== this.currentIndex || this.displayList.length === 0) {
+                        while (this.displayList.length > 0) {
+                            this.displayList.pop();
+                        }
+                        for (curIdx = this.currentIndex;
+                             curIdx < this.list.length && curIdx < this.currentIndex + this.pageSize;
+                             curIdx += 1) {
+                            this.displayList.push(this.list[curIdx]);
+                        }
+                    }
+                }
+            });
+
+            app.controller('myCtrl', Controller);
+
+        })(angular.module('angularApp', []));
+    </script>
+</head>
+<body data-ng-app="angularApp">
+<h1>Angular Debugging and Performance</h1>
+<h2>Rendering vs. Binding</h2>
+<p>Example of rendering static data vs. using data-binding.</p>
+<div data-ng-controller="myCtrl as ctrl">
+    <ul><li data-ng-repeat="number in ctrl.displayList">{{number}}</li></ul>
+    <button data-ng-click="ctrl.currentPage = 1">&lt;&lt;</button>
+    <button data-ng-click="ctrl.currentPage = ctrl.currentPage-1" data-ng-disabled="ctrl.currentPage == 1">&lt;</button>
+    {{ctrl.currentPage}} of {{ctrl.totalPages}}
+    <button data-ng-click="ctrl.currentPage = ctrl.currentPage+1" data-ng-disabled="ctrl.currentPage == ctrl.totalPages">&gt;</button>
+    <button data-ng-click="ctrl.currentPage = ctrl.totalPages">&gt;&gt;</button>
+</div>
+</body>
+</html>

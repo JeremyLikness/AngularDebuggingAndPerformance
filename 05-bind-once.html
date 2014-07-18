@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>AngularJS BindOnce Example</title>
+    <script src="angular.js"></script>
+    <script src="bindonce.js"></script>
+    <script type="text/javascript">
+        'use strict';
+
+        (function (app) {
+
+            function countWatches () {
+                var watchers = [],
+                        f = function (element) {
+                            if (element.scope()) {
+                                angular.forEach(element.scope().$$watchers, function (w) {
+                                    watchers.push(w);
+                                });
+                            }
+
+                            angular.forEach(element.children(), function (child) {
+                                f(angular.element(child));
+                            });
+                        };
+
+                f(angular.element(document.getElementsByTagName('body')));
+
+                return watchers.length;
+            }
+
+            function Controller ($compile, $scope, $timeout) {
+                var idx = 0;
+                this.compile = function (e) {
+                    $compile(e)($scope);
+                };
+                this.$timeout = $timeout;
+                this.list = [];
+                while (idx < 1000) {
+                    this.list.push(Math.random());
+                    idx += 1;
+                }
+                this.countWatches();
+            }
+
+            Controller.$inject = ['$compile', '$scope', '$timeout'];
+
+            angular.extend(Controller.prototype, {
+                watches: 0,
+                countWatches: function () {
+                    var _this = this;
+                    this.$timeout(function () {
+                        _this.watches = countWatches()
+                    }, 0);
+                }
+            });
+
+            app.controller('myCtrl', Controller);
+
+        })(angular.module('angularApp', ['pasvaz.bindonce']));
+    </script>
+</head>
+<body data-ng-app="angularApp">
+<h1>Angular Debugging and Performance</h1>
+<h2>Using BindOnce</h2>
+<p>Example of rendering using the BindOnce module.</p>
+<div data-ng-controller="myCtrl as ctrl">
+    <p>Watch Count: {{ctrl.watches}}</p>
+    <button data-ng-click="ctrl.countWatches()">Refresh</button>
+    <div><span data-bindonce data-ng-repeat="number in ctrl.list" data-bo-text="number"></span></div>
+</div>
+</body>
+</html>
